@@ -9,26 +9,30 @@ import java.awt.event.MouseEvent;
 public class WestHandle extends AbstractFigureHandle {
 
     public WestHandle(Figure owner) {
-        super(owner, Cursor.W_RESIZE_CURSOR);
+        super(owner);
     }
 
     @Override
     public Point getLocation() {
-        Point p = owner.getBounds().getLocation();
-        p.y += owner.getBounds().getHeight() / 2;
-        return p;
-    }
-
-
-    @Override
-    public void startInteraction(int x, int y, MouseEvent e, DrawView v) {
-        Rectangle r = owner.getBounds();
-        corner = new Point(r.x + r.width, r.y);
+        Point tmp = owner.getBounds().getLocation();
+        tmp.y += owner.getBounds().getHeight() / 2;
+        return tmp;
     }
 
     @Override
-    public void dragInteraction(int x, int y, MouseEvent e, DrawView v) {
+    public Cursor getCursor() {
+        return Cursor.getPredefinedCursor(Cursor.W_RESIZE_CURSOR);
+    }
+
+    @Override
+    public Point getFixedCorner() {
         Rectangle r = owner.getBounds();
-        owner.setBounds(new Point(x, corner.y), new Point(corner.x, corner.y + r.height));
+        return new Point(r.x + r.width, r.y);
+    }
+
+    @Override
+    public Point getVariableCorner(int x, int y) {
+        Rectangle r = owner.getBounds();
+        return new Point(x, r.y + r.height);
     }
 }

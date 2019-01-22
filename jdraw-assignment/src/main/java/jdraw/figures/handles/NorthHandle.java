@@ -1,16 +1,13 @@
 package jdraw.figures.handles;
 
-import jdraw.framework.DrawView;
 import jdraw.framework.Figure;
 
 import java.awt.*;
-import java.awt.event.MouseEvent;
 
 public class NorthHandle extends AbstractFigureHandle {
 
-
     public NorthHandle(Figure owner) {
-        super(owner, Cursor.N_RESIZE_CURSOR);
+        super(owner);
     }
 
     @Override
@@ -21,14 +18,19 @@ public class NorthHandle extends AbstractFigureHandle {
     }
 
     @Override
-    public void startInteraction(int x, int y, MouseEvent e, DrawView v) {
-        Rectangle r = owner.getBounds();
-        corner = new Point(r.x + r.width, r.y + r.height);
+    public Cursor getCursor() {
+        return Cursor.getPredefinedCursor(Cursor.N_RESIZE_CURSOR);
     }
 
     @Override
-    public void dragInteraction(int x, int y, MouseEvent e, DrawView v) {
+    public Point getFixedCorner() {
         Rectangle r = owner.getBounds();
-        owner.setBounds(new Point(corner.x - r.width, y), corner);
+        return new Point(r.x + r.width, r.y + r.height);
+    }
+
+    @Override
+    public Point getVariableCorner(int x, int y) {
+        Rectangle r = owner.getBounds();
+        return new Point(r.x, y);
     }
 }

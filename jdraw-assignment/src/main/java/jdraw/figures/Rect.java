@@ -5,57 +5,94 @@
 
 package jdraw.figures;
 
-import jdraw.figures.handles.*;
-import jdraw.framework.FigureHandle;
+import jdraw.framework.FigureEvent;
 
 import java.awt.*;
-import java.util.LinkedList;
-import java.util.List;
+import java.awt.geom.Rectangle2D;
 
 /**
  * Represents shapes in JDraw.
  *
  * @author Christoph Denzler
  */
-public class Rect extends AbstractRectangle<Rectangle> {
-
+public class Rect extends AbstractFigure {
 
     /**
-     * Create a new shape of the given dimension.
+     * Use the java.awt.Rectangle in order to save/reuse code.
+     */
+    private Rectangle2D rectangle;
+
+    /**
+     * Create a new rectangle of the given dimension.
      *
-     * @param x the x-coordinate of the upper left corner of the shape
-     * @param y the y-coordinate of the upper left corner of the shape
-     * @param w the shape's width
-     * @param h the shape's height
+     * @param x the x-coordinate of the upper left corner of the rectangle
+     * @param y the y-coordinate of the upper left corner of the rectangle
+     * @param w the rectangle's width
+     * @param h the rectangle's height
      */
     public Rect(int x, int y, int w, int h) {
-        shape = new Rectangle(x, y, w, h);
+        rectangle = getRectangle(x, y, w, h);
+    }
+
+
+    public Rect(Rect original) {
+        rectangle = getRectangle(original.rectangle.getX(), original.rectangle.getY(), original.rectangle.getWidth(), original.rectangle.getHeight());
+
+    }
+
+    private Rectangle2D.Double getRectangle(double x, double y, double width, double height) {
+        return new Rectangle2D.Double(
+                x,
+                y,
+                width,
+                height
+        );
     }
 
     /**
-     * Draw the shape to the given graphics context.
+     * Draw the rectangle to the given graphics context.
      *
      * @param g the graphics context to use for drawing.
      */
     @Override
     public void draw(Graphics g) {
-        g.setColor(new Color(0, 0, 0, 0));
-        g.fillRect(shape.x, shape.y, shape.width, shape.height);
+        g.setColor(Color.WHITE);
+        g.fillRect((int) rectangle.getX(), (int) rectangle.getY(), (int) rectangle.getWidth(), (int) rectangle.getHeight());
         g.setColor(Color.BLACK);
-        g.drawRect(shape.x, shape.y, shape.width, shape.height);
+        g.drawRect((int) rectangle.getX(), (int) rectangle.getY(), (int) rectangle.getWidth(), (int) rectangle.getHeight());
     }
 
     @Override
-    public List<FigureHandle> getHandles() {
-        List<FigureHandle> handles = new LinkedList<>();
-        handles.add(new NorthWestHandle(this));
-        handles.add(new NorthHandle(this));
-        handles.add(new NorthEastHandle(this));
-        handles.add(new WestHandle(this));
-        handles.add(new EastHandle(this));
-        handles.add(new SouthWestHandle(this));
-        handles.add(new SouthEastHandle(this));
-        handles.add(new SouthHandle(this));
-        return handles;
+    public void setBounds(Point origin, Point corner) {
+        Rectangle2D.Double original = getRectangle(rectangle.getX(), rectangle.getY(), rectangle.getWidth(), rectangle.getHeight());
+        rectangle.setFrameFromDiagonal(origin, corner);
+        if (!original.equals(rectangle)) {
+            notifyListeners(new FigureEvent(this));
+        }
+    }
+
+    @Override
+    public void move(int dx, int dy) {
+        if (dx != 0 || dy != 0) {
+            rectangle.setFrame(rectangle.getX() + dx, rectangle.getY() + dy, rectangle.getWidth(), rectangle.getHeight());
+            notifyListeners(new FigureEvent(this));
+        }
+    }
+
+    @Override
+    public boolean contains(int x, int y) {
+        return rectangle.contains(x, y);
+    }
+
+    @Override
+    public Rectangle getBounds() {
+        return rectangle.getBounds();
+    }
+
+    @Override
+    public Rect clone() {
+        Rect copy = (Rect) super.clone();
+        copy.rectangle = (Rectangle2D) copy.rectangle.clone();
+        return copy;
     }
 }

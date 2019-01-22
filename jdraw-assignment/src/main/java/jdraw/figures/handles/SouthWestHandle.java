@@ -9,27 +9,29 @@ import java.awt.event.MouseEvent;
 public class SouthWestHandle extends AbstractFigureHandle {
 
     public SouthWestHandle(Figure owner) {
-        super(owner, Cursor.SW_RESIZE_CURSOR);
+        super(owner);
     }
-
 
     @Override
     public Point getLocation() {
-        Point p = owner.getBounds().getLocation();
-        p.y += owner.getBounds().getHeight();
-        return p;
+        Point tmp = owner.getBounds().getLocation();
+        tmp.y += owner.getBounds().getHeight();
+        return tmp;
     }
 
     @Override
-    public void startInteraction(int x, int y, MouseEvent e, DrawView v) {
-        Rectangle r = owner.getBounds();
-        corner = new Point(r.x, r.y);
+    public Cursor getCursor() {
+        return Cursor.getPredefinedCursor(Cursor.SW_RESIZE_CURSOR);
     }
 
     @Override
-    public void dragInteraction(int x, int y, MouseEvent e, DrawView v) {
+    public Point getFixedCorner() {
         Rectangle r = owner.getBounds();
-        owner.setBounds(corner, new Point(corner.x + r.width, y));
+        return new Point(r.x + r.width, r.y);
+    }
+
+    @Override
+    public Point getVariableCorner(int x, int y) {
+        return new Point(x, y);
     }
 }
-

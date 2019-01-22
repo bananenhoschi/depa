@@ -9,13 +9,12 @@ import java.awt.event.MouseEvent;
 
 public abstract class AbstractFigureHandle implements FigureHandle {
 
-    protected final Figure owner;
-    protected Point corner;
-    private final int cursor;
 
-    public AbstractFigureHandle(Figure owner, int cursor) {
+    protected Figure owner;
+    protected Point anchorPoint, oldCorner;
+
+    public AbstractFigureHandle(Figure owner) {
         this.owner = owner;
-        this.cursor = cursor;
     }
 
     @Override
@@ -28,38 +27,37 @@ public abstract class AbstractFigureHandle implements FigureHandle {
         Point loc = getLocation();
         g.setColor(Color.WHITE);
         g.fillRect(loc.x - 3, loc.y - 3, 6, 6);
-        g.setColor(Color.RED);
+        g.setColor(Color.BLACK);
         g.drawRect(loc.x - 3, loc.y - 3, 6, 6);
-    }
-
-
-    @Override
-    public Point getLocation() {
-        return getOwner().getBounds().getLocation();
-    }
-
-    @Override
-    public Cursor getCursor() {
-        return Cursor.getPredefinedCursor(cursor);
     }
 
     @Override
     public boolean contains(int x, int y) {
-        return getLocation().distanceSq(x, y) < 25;
+        Point loc = getLocation();
+        Rectangle handleBounds = new Rectangle(loc.x - 3, loc.y - 3, 6, 6);
+        return handleBounds.contains(x, y);
     }
 
+    @Override
+    public void startInteraction(int x, int y, MouseEvent e, DrawView v) {
+        anchorPoint = getFixedCorner();
+        oldCorner = new Point(x, y);
+    }
+
+    @Override
+    public void dragInteraction(int x, int y, MouseEvent e, DrawView v) {
+        owner.setBounds(getVariableCorner(x, y), anchorPoint);
+        Point newCorner = new Point(x, y);
+        owner.setBounds(anchorPoint, newCorner);
+        //v.getModel().getDrawCommandHandler().addCommand(new SetBoundsCommand(owner, anchorPoint, oldCorner, anchorPoint, newCorner));
+    }
 
     @Override
     public void stopInteraction(int x, int y, MouseEvent e, DrawView v) {
-        corner = null;
+        anchorPoint = null;
     }
 
+    abstract public Point getFixedCorner();
 
-    public int getWidth() {
-        return Double.valueOf(getOwner().getBounds().getWidth()).intValue();
-    }
-
-    public int getHeight() {
-        return Double.valueOf(getOwner().getBounds().getHeight()).intValue();
-    }
+    abstract public Point getVariableCorner(int x, int y);
 }

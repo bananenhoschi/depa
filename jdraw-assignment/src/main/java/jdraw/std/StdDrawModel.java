@@ -60,8 +60,7 @@ public class StdDrawModel implements DrawModel, FigureListener {
     /**
      * The draw command handler. Initialized here with a dummy implementation.
      */
-    // TODO initialize with your implementation of the undo/redo-assignment.
-    private DrawCommandHandler handler = new EmptyDrawCommandHandler();
+    private DrawCommandHandler handler = new JDrawCommandHandler();
 
     /**
      * Retrieve the draw command handler in use.
@@ -75,8 +74,18 @@ public class StdDrawModel implements DrawModel, FigureListener {
 
     @Override
     public void setFigureIndex(Figure f, int index) {
-        // TODO to be implemented
-        System.out.println("StdDrawModel.setFigureIndex has to be implemented");
+        int pos = figures.indexOf(f);
+        if (pos < 0) {
+            throw new IllegalArgumentException("Figure f is not contained in the Model");
+        }
+        if (index > figures.size() - 1) {
+            throw new IndexOutOfBoundsException("Index out of bound");
+        }
+        if (pos != index) {
+            figures.remove(f);
+            figures.add(index, f);
+            notifyListeners(f, DrawModelEvent.Type.DRAWING_CHANGED);
+        }
     }
 
     @Override

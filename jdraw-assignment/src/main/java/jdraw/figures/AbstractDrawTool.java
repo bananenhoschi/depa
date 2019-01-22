@@ -11,14 +11,9 @@ import java.awt.event.MouseEvent;
 
 abstract public class AbstractDrawTool<T extends Figure> implements DrawTool {
 
-    /**
-     * Temporary variable. During rectangle creation (during a
-     * mouse down - mouse drag - mouse up cycle) this variable refers
-     * to the new rectangle that is inserted.
-     */
-    protected T figure = null;
 
-
+    private String name;
+    private String icon;
     /**
      * the image resource path.
      */
@@ -35,18 +30,13 @@ abstract public class AbstractDrawTool<T extends Figure> implements DrawTool {
      */
     protected final DrawView view;
 
-    /**
-     * Temporary variable.
-     * During rectangle creation this variable refers to the point the
-     * mouse was first pressed.
-     */
-    protected Point anchor = null;
 
-    public AbstractDrawTool(DrawContext context) {
+    public AbstractDrawTool(DrawContext context, String name, String icon) {
         this.context = context;
         this.view = context.getView();
+        this.name = name;
+        this.icon = icon;
     }
-
     /**
      * Deactivates the current mode by resetting the cursor
      * and clearing the status bar.
@@ -78,44 +68,12 @@ abstract public class AbstractDrawTool<T extends Figure> implements DrawTool {
         return Cursor.getPredefinedCursor(Cursor.CROSSHAIR_CURSOR);
     }
 
-    /**
-     * During a mouse drag, the Rectangle will be resized according to the mouse
-     * position. The status bar shows the current size.
-     *
-     * @param x x-coordinate of mouse
-     * @param y y-coordinate of mouse
-     * @param e event containing additional information about which keys were
-     *          pressed.
-     * @see jdraw.framework.DrawTool#mouseDrag(int, int, MouseEvent)
-     */
     @Override
-    public void mouseDrag(int x, int y, MouseEvent e) {
-        figure.setBounds(anchor, new Point(x, y));
-        java.awt.Rectangle r = figure.getBounds();
-        this.context.showStatusText("w: " + r.width + ", h: " + r.height);
+    public String getName() {
+        return name;
     }
-
-    /**
-     * When the user releases the mouse, the Rectangle object is updated
-     * according to the color and fill status settings.
-     *
-     * @param x x-coordinate of mouse
-     * @param y y-coordinate of mouse
-     * @param e event containing additional information about which keys were
-     *          pressed.
-     * @see jdraw.framework.DrawTool#mouseUp(int, int, MouseEvent)
-     */
-    @Override
-    public void mouseUp(int x, int y, MouseEvent e) {
-        figure = null;
-        anchor = null;
-        this.context.showStatusText(getName() +" Mode");
-    }
-
-    @Override
-    abstract public String getName();
 
     public String getIconName() {
-        return getName().toLowerCase() + ".png";
+        return icon;
     }
 }

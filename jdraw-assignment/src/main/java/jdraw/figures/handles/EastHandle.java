@@ -9,26 +9,31 @@ import java.awt.event.MouseEvent;
 public class EastHandle extends AbstractFigureHandle {
 
     public EastHandle(Figure owner) {
-        super(owner, Cursor.E_RESIZE_CURSOR);
+        super(owner);
     }
 
     @Override
     public Point getLocation() {
-        Point p = owner.getBounds().getLocation();
-        p.x += owner.getBounds().getWidth();
-        p.y += owner.getBounds().getHeight() / 2;
-        return p;
+        Point tmp = owner.getBounds().getLocation();
+        tmp.x += owner.getBounds().getWidth();
+        tmp.y += owner.getBounds().getHeight() / 2;
+        return tmp;
     }
 
     @Override
-    public void startInteraction(int x, int y, MouseEvent e, DrawView v) {
-        Rectangle r = owner.getBounds();
-        corner = new Point(r.x, r.y + r.height);
+    public Cursor getCursor() {
+        return Cursor.getPredefinedCursor(Cursor.E_RESIZE_CURSOR);
     }
 
     @Override
-    public void dragInteraction(int x, int y, MouseEvent e, DrawView v) {
+    public Point getFixedCorner() {
         Rectangle r = owner.getBounds();
-        owner.setBounds(new Point(corner.x, corner.y - r.height), new Point(x, corner.y));
+        return new Point(r.x, r.y + r.height);
+    }
+
+    @Override
+    public Point getVariableCorner(int x, int y) {
+        Rectangle r = owner.getBounds();
+        return new Point(x, r.y);
     }
 }

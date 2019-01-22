@@ -1,28 +1,35 @@
 package jdraw.figures;
 
+import jdraw.figures.handles.*;
 import jdraw.framework.Figure;
 import jdraw.framework.FigureEvent;
 import jdraw.framework.FigureHandle;
 import jdraw.framework.FigureListener;
 
-import java.awt.*;
+import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.concurrent.CopyOnWriteArrayList;
 
-abstract public class AbstractFigure<T extends Shape> implements Figure {
+abstract public class AbstractFigure implements Figure {
 
-    /**
-     * Use the java.awt.Rectangle in order to save/reuse code.
-     */
-    protected T shape;
-
-
-    private List<FigureListener> listeners = new CopyOnWriteArrayList<>();
+    private List<FigureListener> listeners = new ArrayList<>();
 
     @Override
     public void addFigureListener(FigureListener listener) {
-        if (listener != null)
+        if (listener != null && !listeners.contains(listener)) {
             listeners.add(listener);
+        }
+    }
+
+    @Override
+    public AbstractFigure clone() {
+        try {
+            AbstractFigure copy = (AbstractFigure) super.clone();
+            copy.listeners = new LinkedList<>();
+            return copy;
+        } catch (CloneNotSupportedException e) {
+            throw new InternalError();
+        }
     }
 
     @Override
@@ -30,42 +37,24 @@ abstract public class AbstractFigure<T extends Shape> implements Figure {
         listeners.remove(listener);
     }
 
-    @Override
-    public Figure clone() {
-        return null;
-    }
-
     protected void notifyListeners(FigureEvent evt) {
-        if (evt != null) {
-            FigureListener[] copy = listeners.toArray(new FigureListener[listeners.size()]);
-            for (FigureListener listener : copy) {
-                listener.figureChanged(evt);
-            }
+        FigureListener[] copy = listeners.toArray(new FigureListener[listeners.size()]);
+        for (FigureListener listener : copy) {
+            listener.figureChanged(evt);
         }
-
     }
 
-    @Override
-    public boolean contains(int x, int y) {
-        return shape.contains(x, y);
-    }
-
-    @Override
-    public Rectangle getBounds() {
-        return shape.getBounds();
-    }
-
-
-    /**
-     * Returns a list of 8 handles for this Rectangle.
-     *
-     * @return all handles that are attached to the targeted figure.
-     * @see jdraw.framework.Figure#getHandles()
-     */
     @Override
     public List<FigureHandle> getHandles() {
-        return null;
+        List<FigureHandle> handles = new LinkedList<>();
+        handles.add(new NorthHandle(this));
+        handles.add(new NorthEastHandle(this));
+        handles.add(new EastHandle(this));
+        handles.add(new SouthEastHandle(this));
+        handles.add(new SouthHandle(this));
+        handles.add(new SouthWestHandle(this));
+        handles.add(new WestHandle(this));
+        handles.add(new NorthWestHandle(this));
+        return handles;
     }
-
-
 }

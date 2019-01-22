@@ -4,7 +4,10 @@
  */
 package jdraw.std;
 
-import jdraw.figures.*;
+import jdraw.figures.BorderDecorator;
+import jdraw.figures.LineTool;
+import jdraw.figures.OvalTool;
+import jdraw.figures.RectTool;
 import jdraw.framework.*;
 import jdraw.grids.Grid20;
 import jdraw.grids.Grid50;
@@ -44,6 +47,8 @@ public class StdContext extends AbstractContext {
     public StdContext(DrawView view, List<DrawToolFactory> toolFactories) {
         super(view, toolFactories);
     }
+
+    private SimpleClipboard clipboard = new SimpleClipboard();
 
     /**
      * Creates and initializes the "Edit" menu.
@@ -88,9 +93,38 @@ public class StdContext extends AbstractContext {
         );
 
         editMenu.addSeparator();
-        editMenu.add("Cut").setEnabled(false);
-        editMenu.add("Copy").setEnabled(false);
-        editMenu.add("Paste").setEnabled(false);
+
+        JMenuItem cut = new JMenuItem("Cut");
+        cut.addActionListener(e -> {
+            clipboard.clear();
+            for (Figure f : getView().getSelection()) {
+                clipboard.add(f);
+                getModel().removeFigure(f);
+            }
+        });
+        editMenu.add(cut);
+
+
+        JMenuItem paste = new JMenuItem("Paste");
+        paste.addActionListener(e -> {
+            getView().clearSelection();
+            for (Figure f : clipboard.get()) {
+                Figure f2 = f.clone();
+                getModel().addFigure(f2);
+                getView().addToSelection(f2);
+            }
+        });
+        JMenuItem copy = new JMenuItem("Copy");
+        copy.addActionListener(e -> {
+            clipboard.clear();
+            for (Figure f : getView().getSelection()) {
+                Figure f2 = f.clone();
+                clipboard.add(f2);
+            }
+        });
+        editMenu.add(cut);
+        editMenu.add(copy);
+        editMenu.add(paste);
 
         editMenu.addSeparator();
         JMenuItem clear = new JMenuItem("Clear");
@@ -142,21 +176,16 @@ public class StdContext extends AbstractContext {
         editMenu.add(grid);
 
 
-        JMenuItem dec = new JMenuItem("Toggle Green Decorator");
+        JMenuItem dec = new JMenuItem("Add Border");
         editMenu.add(dec);
         dec.addActionListener(e -> {
                     List<Figure> s = getView().getSelection();
                     getView().clearSelection();
                     for (Figure f : s) {
-                        Figure f2 = null;
-                        if (f instanceof GreenDecorator) {
-                            f2 = ((GreenDecorator) f).getInner();
-                        } else {
-                            f2 = new SimpleDecorator(f);
-                        }
+                        BorderDecorator decorator = new BorderDecorator(f);
                         getModel().removeFigure(f);
-                        getModel().addFigure(f2);
-                        getView().addToSelection(f2);
+                        getModel().addFigure(decorator);
+                        getView().addToSelection(decorator);
                     }
                 }
         );
@@ -192,11 +221,11 @@ public class StdContext extends AbstractContext {
 
     @Override
     protected void doRegisterDrawTools() {
-        DrawTool rectangleTool = new RectTool(this);
+        DrawTool rectangleTool = new RectTool(this, "Rectangle", "rectangle.png");
         addTool(rectangleTool);
-        DrawTool ovalTool = new OvalTool(this);
+        DrawTool ovalTool = new OvalTool(this, "Oval", "oval.png");
         addTool(ovalTool);
-        DrawTool lineTool = new LineTool(this);
+        DrawTool lineTool = new LineTool(this, "Line", "line.png");
         addTool(lineTool);
     }
 

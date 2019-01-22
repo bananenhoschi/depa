@@ -32,22 +32,18 @@ public abstract class AbstractGrid implements DrawGrid {
 
     @Override
     public void activate() {
-        System.out.println(String.format("%s:activate()", getClass().getName()));
     }
 
     @Override
     public void deactivate() {
-        System.out.println(String.format("%s:deactivate()", getClass().getName()));
     }
 
     @Override
     public void mouseDown() {
-        System.out.println(String.format("%s:mouseDown()", getClass().getName()));
     }
 
     @Override
     public void mouseUp() {
-        System.out.println(String.format("%s:mouseUp()", getClass().getName()));
     }
 
 }

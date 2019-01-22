@@ -1,34 +1,36 @@
 package jdraw.figures.handles;
 
-import jdraw.framework.DrawView;
 import jdraw.framework.Figure;
 
 import java.awt.*;
-import java.awt.event.MouseEvent;
 
 public class SouthEastHandle extends AbstractFigureHandle {
 
     public SouthEastHandle(Figure owner) {
-        super(owner, Cursor.SE_RESIZE_CURSOR);
+        super(owner);
     }
-
 
     @Override
     public Point getLocation() {
-        Point p = owner.getBounds().getLocation();
-        p.x += owner.getBounds().getWidth();
-        p.y += owner.getBounds().getHeight();
-        return p;
+        Point tmp = owner.getBounds().getLocation();
+        tmp.x += owner.getBounds().getWidth();
+        tmp.y += owner.getBounds().getHeight();
+        return tmp;
     }
 
     @Override
-    public void startInteraction(int x, int y, MouseEvent e, DrawView v) {
+    public Cursor getCursor() {
+        return Cursor.getPredefinedCursor(Cursor.SE_RESIZE_CURSOR);
+    }
+
+    @Override
+    public Point getFixedCorner() {
         Rectangle r = owner.getBounds();
-        corner = new Point(r.x, r.y);
+        return new Point(r.x, r.y);
     }
 
     @Override
-    public void dragInteraction(int x, int y, MouseEvent e, DrawView v) {
-        owner.setBounds(corner, new Point(x, y));
+    public Point getVariableCorner(int x, int y) {
+        return new Point(x, y);
     }
 }
